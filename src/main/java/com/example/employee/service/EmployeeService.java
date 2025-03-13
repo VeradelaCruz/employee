@@ -1,11 +1,13 @@
 package com.example.employee.service;
 
-import com.example.employee.models.Department;
+import com.example.employee.dto.EmployeeAndDepartmentDTO;
+import com.example.employee.common.Department;
 import com.example.employee.models.Employee;
 import com.example.employee.repository.EmployeeRepository;
 import jakarta.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -51,18 +53,24 @@ public class EmployeeService {
 
     //Microservicios:
     //Create Employee
-    public Employee addEmployee(Employee employee) {
-        // Consumir el microservicio de Department para obtener el departamento
+    public Employee addEmployee(EmployeeAndDepartmentDTO employeeAndDepartmentDTO) {
+        // Llamar al microservicio de Department
         Department department = apiConsumir.getForObject(
-                "http://localhost:8081/department/getDepartmentBy/" + employee.getDepartment().getDepartmentId(),
+                "http://localhost:8081/department/getDepartmentBy/" + employeeAndDepartmentDTO.getDepartmentId(),
                 Department.class);
 
+        // Verificar si el departamento no existe
         if (department == null) {
             throw new RuntimeException("Department not found.");
         }
 
-        // Asignar el departamento al empleado
-        employee.setDepartment(department);
+        // Crear el empleado
+        Employee employee = new Employee();
+        employee.setEmployee_name(employeeAndDepartmentDTO.getEmployee_name());
+        employee.setEmail(employeeAndDepartmentDTO.getEmail());
+        employee.setSalary(employeeAndDepartmentDTO.getSalary());
+        employee.setDepartmentId(employeeAndDepartmentDTO.getDepartmentId()); // Guardar solo el ID
+
         return employeeRepository.save(employee);
     }
 
@@ -83,16 +91,9 @@ public class EmployeeService {
             return employee.getEmployee_name() + "'s department is " + departmentName;
     }
 
-    //Asign department:
-    public Employee updateDepartment(Long employee_id, Department departmentId){
-        Employee employee= employeeRepository.findById(employee_id)
-                .orElseThrow(()-> new RuntimeException("Employee not found."));
-        Department department = apiConsumir.getForObject(
-                "http://localhost:8081/department/getDepartmentById/" + departmentId,
-                Department.class);
-        employee.setDepartment(department);
-        return employeeRepository.save(employee);
-    }
+    //Buscar departamento por id de empleado
+
+
 }
 
 

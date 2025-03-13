@@ -1,5 +1,6 @@
 package com.example.employee.models;
 
+import com.example.employee.common.Department;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -31,7 +32,6 @@ public class Employee {
     public Employee(String employeeName, String email, Double salary) {
     }
 
-    @ManyToOne
-    @JoinColumn(name = "departmentId")
-    private Department department;
+    @Column(nullable = false)
+    private Long departmentId;
 }

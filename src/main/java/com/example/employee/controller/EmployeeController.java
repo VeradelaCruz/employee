@@ -1,6 +1,7 @@
 package com.example.employee.controller;
 
-import com.example.employee.models.Department;
+import com.example.employee.dto.EmployeeAndDepartmentDTO;
+import com.example.employee.common.Department;
 import com.example.employee.models.Employee;
 import com.example.employee.service.EmployeeService;
 import jakarta.persistence.NoResultException;
@@ -55,10 +56,10 @@ public class EmployeeController {
     }
 
     @PostMapping("/addEmployee")
-    public ResponseEntity<String> createEmployee(@Valid @RequestBody Employee employee) {
-        Employee savedEmployee = employeeService.addEmployee(employee);
+    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody EmployeeAndDepartmentDTO employeeAndDepartmentDTO) {
+        Employee savedEmployee = employeeService.addEmployee(employeeAndDepartmentDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Employee created: " + savedEmployee.getEmployee_name());
+                .body(savedEmployee);
     }
 
     @GetMapping("/departmentAndEmployee/{departmentId}/{employee_id}/")
@@ -73,13 +74,5 @@ public class EmployeeController {
             // En caso de error (por ejemplo, si no se encuentra el empleado), devolver 404 Not Found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
         }
-    }
-    @PutMapping("/asignDepartment")
-    public ResponseEntity<?> changeDepartment (@RequestBody Long employee_id, Department departmentId){
-        Employee employeeUpdated= employeeService.updateDepartment(employee_id, departmentId);
-        return ResponseEntity.ok((
-                "Department updated successfully for " + employeeUpdated.getEmployee_name() +
-                        ". New department: " + employeeUpdated.getDepartment().getDepartmentName()
-        ));
     }
 }
