@@ -2,6 +2,7 @@ package com.example.employee.controller;
 
 import com.example.employee.dto.EmployeeAndDepartmentDTO;
 import com.example.employee.common.Department;
+import com.example.employee.dto.EmployeeByDepartmentDTO;
 import com.example.employee.models.Employee;
 import com.example.employee.service.EmployeeService;
 import jakarta.persistence.NoResultException;
@@ -62,8 +63,9 @@ public class EmployeeController {
                 .body(savedEmployee);
     }
 
-    @GetMapping("/departmentAndEmployee/{departmentId}/{employee_id}/")
-    public ResponseEntity<?> getDepartmentAndEmployee(@PathVariable Long departmentId, Long employee_id) {
+    @GetMapping("/departmentAndEmployee/{departmentId}/{employee_id}")
+    public ResponseEntity<?> getDepartmentAndEmployee(@PathVariable Long departmentId,
+                                                      @PathVariable Long employee_id) {
         try {
             // Llamar al servicio para obtener la información del empleado y departamento
             String result = employeeService.showDepartmentEmployee(departmentId,employee_id);
@@ -72,7 +74,20 @@ public class EmployeeController {
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             // En caso de error (por ejemplo, si no se encuentra el empleado), devolver 404 Not Found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @GetMapping("/by-department/{departmentId}")
+    public ResponseEntity<?> getEmployeeByDepartment(@PathVariable Long departmentId) {
+        try {
+            // Llamar al servicio que obtiene los empleados y el nombre del departamento
+            EmployeeByDepartmentDTO response = employeeService.showEmployeesByDepartment(departmentId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            // En caso de error, devolver un mensaje claro
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Department with ID " + departmentId + " not found.");
+        }
+    }
+
 }

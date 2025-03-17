@@ -2,6 +2,7 @@ package com.example.employee.service;
 
 import com.example.employee.dto.EmployeeAndDepartmentDTO;
 import com.example.employee.common.Department;
+import com.example.employee.dto.EmployeeByDepartmentDTO;
 import com.example.employee.models.Employee;
 import com.example.employee.repository.EmployeeRepository;
 import jakarta.persistence.NoResultException;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmployeeService {
@@ -51,6 +53,7 @@ public class EmployeeService {
     }
 
 
+
     //Microservicios:
     //Create Employee
     public Employee addEmployee(EmployeeAndDepartmentDTO employeeAndDepartmentDTO) {
@@ -78,22 +81,40 @@ public class EmployeeService {
     //Show employee and department:
     public String showDepartmentEmployee(Long departmentId,Long employee_id){
             // Obtener la información del departamento
-            Department department = apiConsumir.getForObject("http://localhost:8081/department/getDepartmentById/" + departmentId, Department.class);
+            Department department = apiConsumir.getForObject(
+                    "http://localhost:8081/department/getDepartmentBy/" + departmentId, Department.class);
 
             // Obtener el nombre del departamento
-            String departmentName = department.getDepartmentName();
+            if(department==null){
+                throw new RuntimeException("Department not found.");
+            }
 
             // Obtener el empleado desde la base de datos
             Employee employee = employeeRepository.findById(employee_id)
                     .orElseThrow(() -> new RuntimeException("Employee not found"));
 
             // Retornar el nombre del empleado y el nombre del departamento
-            return employee.getEmployee_name() + "'s department is " + departmentName;
+            return employee.getEmployee_name() + "'s department is " + department.getDepartmentName();
     }
 
-    //Buscar departamento por id de empleado
+
+
+    //Show employees by department:
+    public EmployeeByDepartmentDTO showEmployeesByDepartment(Long departmentId) {
+        // 1. Obtener el departamento desde el microservicio de department
+        Department department = apiConsumir.getForObject(
+                "http://localhost:8081/department/getDepartmentBy/" + departmentId, Department.class);
+
+        if (department == null) {
+            throw new RuntimeException("Department with ID " + departmentId + " not found.");
+        }
+
+        // 2. Obtener la lista de empleados asociados con el departamento
+        List<Employee> employees = employeeRepository.findEmployeesByDepartmentId(departmentId);
+
+        // 3. Devolver el DTO con el nombre del departamento y la lista de empleados
+        return new EmployeeByDepartmentDTO(department.getDepartmentName(), employees);
+    }
 
 
 }
-
-
