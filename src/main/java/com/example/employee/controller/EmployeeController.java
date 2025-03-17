@@ -1,5 +1,6 @@
 package com.example.employee.controller;
 
+import com.example.employee.dto.AmountEmployeesDTO;
 import com.example.employee.dto.EmployeeAndDepartmentDTO;
 import com.example.employee.common.Department;
 import com.example.employee.dto.EmployeeByDepartmentDTO;
@@ -90,4 +91,15 @@ public class EmployeeController {
         }
     }
 
+    @GetMapping("/countEmployees/{departmentId}")
+    public ResponseEntity<?> getAmountEmployees(@PathVariable Long departmentId){
+        try {
+            AmountEmployeesDTO response= employeeService.amountOfEmployeesByDepartment(departmentId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Department with ID "+ departmentId +" not found.");
+
+
+        }
+    }
 }

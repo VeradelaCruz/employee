@@ -1,5 +1,6 @@
 package com.example.employee.service;
 
+import com.example.employee.dto.AmountEmployeesDTO;
 import com.example.employee.dto.EmployeeAndDepartmentDTO;
 import com.example.employee.common.Department;
 import com.example.employee.dto.EmployeeByDepartmentDTO;
@@ -114,6 +115,27 @@ public class EmployeeService {
 
         // 3. Devolver el DTO con el nombre del departamento y la lista de empleados
         return new EmployeeByDepartmentDTO(department.getDepartmentName(), employees);
+    }
+
+
+    //Show amount of employees on each department:
+
+    public AmountEmployeesDTO amountOfEmployeesByDepartment(Long departmentId){
+        //1.Obtener el departamento desde el microservicio de department:
+        Department department= apiConsumir.getForObject(
+                "http://localhost:8081/department/getDepartmentBy/" + departmentId, Department.class);
+
+        if(department==null){
+            throw new RuntimeException("Department with ID "+ departmentId + "not found.");
+        }
+
+        //2. Obtener la lista de la cantidad de empleados que tiene cada departamento:
+        Long amountEmployee= employeeRepository.countEmployeesByDepartment(departmentId);
+
+        //3. Devolver el DTO con el departmaneto y la cantidad de empleados:
+        return new AmountEmployeesDTO(department.getDepartmentName(), amountEmployee);
+
+
     }
 
 
