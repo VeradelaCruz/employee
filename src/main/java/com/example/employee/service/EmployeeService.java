@@ -9,7 +9,6 @@ import com.example.employee.repository.EmployeeRepository;
 import jakarta.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -138,5 +137,21 @@ public class EmployeeService {
 
     }
 
+    //Change employee's department:
+    public Employee changeDepartment(Long employee_id, Long departmentId){
+        //1.Obtener el departamento desde el microservicio de department:
+        Department department= apiConsumir.getForObject("http://localhost:8081/department/getDepartmentBy/" + departmentId, Department.class);
+
+        if (department==null){
+            throw new RuntimeException("Department with ID "+ departmentId + " not found.");
+        }
+        //2. Otener el empleado que se quiere actualizar:
+        Employee employee= employeeRepository.findById(employee_id)
+                .orElseThrow(()->new RuntimeException("Employee not found."));
+
+        //3. Modificar su departamento:
+        employee.setDepartmentId(departmentId);
+        return employeeRepository.save(employee);
+    }
 
 }

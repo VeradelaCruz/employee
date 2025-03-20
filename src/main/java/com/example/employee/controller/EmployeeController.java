@@ -98,8 +98,18 @@ public class EmployeeController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Department with ID "+ departmentId +" not found.");
-
-
         }
+    }
+
+    @PutMapping("/changeDepartment/{employee_id}/{departmentId}")
+    public ResponseEntity<?> asingOtherDepartment(@PathVariable Long employee_id,
+                                                  @PathVariable Long departmentId){
+        try {
+            Employee employee= employeeService.changeDepartment(employee_id, departmentId);
+            return ResponseEntity.ok("Department assigned");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+
     }
 }
